@@ -11,7 +11,8 @@ setuptools.setup(
     description="Collecting product information from Dutch supermarkets: Albert Heijn and Jumbo",
     long_description=long_description,
     install_requires=[
-        'requests'
+        'requests',
+        'beautifulsoup4',
     ],
     long_description_content_type="text/markdown",
     url="https://github.com/bartmachielsen/SupermarktConnector",

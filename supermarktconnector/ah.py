@@ -150,19 +150,4 @@ class AHConnector:
 
 
 if __name__ == '__main__':
-    connector = AHConnector()
-    # pprint(connector.search_products())
-    # pprint(len(list(connector.search_all_products(query='smint'))))
-    # pprint(connector.get_product_details(connector.get_product_by_barcode('8410031965902')))
-    # pprint(connector.get_categories())
-    # pprint(connector.get_sub_categories(connector.get_categories()[0]))
-
-    # pprint(connector.search_products('Smint')['products'])
-
-    # pprint(connector.get_product_details(177119))
-
-    # pprint(connector.get_bonus_periods())
-    # pprint(connector.get_bonus_periods_products(connector.get_bonus_periods()[0]['urlMetadataList'][0]['url']))
-
-    for bonus_prod in connector.get_all_bonus_products():
-        print(bonus_prod)
+    print("Just use pip install -e <root> to test")
