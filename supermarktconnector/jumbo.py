@@ -19,6 +19,7 @@ class JumboConnector:
             logging.info("size is unnecessary, as jumbo always returns 24 products per page")
         search_url = 'https://www.jumbo.com/producten/'
         offSet = page * 24
+        query = query.replace(' ', '+') if query else ''
         params = {
             'searchType': 'keyword',
             'searchTerms': query,
@@ -95,7 +96,8 @@ class JumboConnector:
     def __validate_jumbo_link(self, link):
         if not link or not link.startswith('/producten/'):
             raise ValueError('Jumbo link is required')
-        
+    
+    # FIXME: Almost all of this data is contained within the search result thumbnail itself, so this method is redundant
     def get_product_details(self, product):
         product_link = product if isinstance(product, str) else product.get('link')
         self.__validate_jumbo_link(product_link)
@@ -132,7 +134,6 @@ class JumboConnector:
         product_details['image'] = image_tag['src'] if image_tag else None
         
         # PPU
-        # <div data-v-03d5c0c3="" class="price-per-unit"><div data-v-03d5c0c3="" class="screenreader-only">€&nbsp;8,76 per liter</div><span data-v-03d5c0c3="" aria-hidden="true">8,76</span><span data-v-03d5c0c3="" aria-hidden="true">/</span><span data-v-03d5c0c3="" aria-hidden="true">liter</span></div>
         ppu_tag = info_div.find('div', class_='price-per-unit')
         if ppu_tag:
             ppu = ppu_tag.find_all('span')
