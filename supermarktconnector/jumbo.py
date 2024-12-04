@@ -54,7 +54,6 @@ class JumboConnector:
             else:
                 product_price = None
 
-            print(f"[DEBUG] Product: {product_name}, Price: {product_price}, Link: {product_link}")
             products.append({
                 'name': product_name,
                 'link': product_link,
@@ -89,14 +88,12 @@ class JumboConnector:
                 break
 
     def get_product_by_barcode(self, barcode):
-        print(f"[DEBUG] Searching for product with barcode: {barcode}")
         products = self.search_products(query=barcode)
         result = products[0] if products else None
-        print(f"[DEBUG] Found product: {result}")
         return result
 
     def __validate_jumbo_link(self, link):
-        if not link or not link.startswith('https://www.jumbo.com'):
+        if not link or not link.startswith('/producten/'):
             raise ValueError('Jumbo link is required')
         
     def get_product_details(self, product):
@@ -107,23 +104,42 @@ class JumboConnector:
             response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         product_details = {}
-
+        
+        info_div = soup.find('div', class_='product-panel-info')
+        
         # Product name
-        name_tag = soup.find('h1', class_='jum-heading--1')
+        name_tag = info_div.find('h1', class_='jum-heading')
         product_details['name'] = name_tag.text.strip() if name_tag else None
 
-        # Description
-        description_tag = soup.find('div', class_='jum-product-detail__description')
-        product_details['description'] = description_tag.text.strip() if description_tag else None
+        # Description (find the first div with class 'open jum-collapsible')
+        description_tag = soup.find('div', class_='open jum-collapsible')
+        product_details['description'] = description_tag.text if description_tag else None
 
         # Price
-        price_integer = soup.find('span', class_='jum-price-format__integer')
-        price_decimal = soup.find('span', class_='jum-price-format__decimal')
+        price_integer = info_div.find('span', class_='whole')
+        price_decimal = info_div.find('span', class_='fractional')
         if price_integer and price_decimal:
             product_details['price'] = f"{price_integer.text.strip()}.{price_decimal.text.strip()}"
         else:
             product_details['price'] = None
 
+        # Quantity
+        quantity_tag = info_div.find('span', class_='product-subtitle')
+        product_details['quantity'] = quantity_tag.text.strip() if quantity_tag else None
+        
+        # Image
+        image_tag = soup.find('img', class_='image')
+        product_details['image'] = image_tag['src'] if image_tag else None
+        
+        # PPU
+        # <div data-v-03d5c0c3="" class="price-per-unit"><div data-v-03d5c0c3="" class="screenreader-only">€&nbsp;8,76 per liter</div><span data-v-03d5c0c3="" aria-hidden="true">8,76</span><span data-v-03d5c0c3="" aria-hidden="true">/</span><span data-v-03d5c0c3="" aria-hidden="true">liter</span></div>
+        ppu_tag = info_div.find('div', class_='price-per-unit')
+        if ppu_tag:
+            ppu = ppu_tag.find_all('span')
+            product_details['ppu'] = f"{ppu[0].text.strip()} {ppu[1].text.strip()} {ppu[2].text.strip()}"
+        else:
+            product_details['ppu'] = None
+        
         return product_details
 
     def get_categories(self):
@@ -194,7 +210,4 @@ class JumboConnector:
 
 
 if __name__ == '__main__':
-    connector = JumboConnector()
-    print("[DEBUG] Starting test for search_products")
-    products = connector.search_products(query="milk")
-    print(products)
+    print("Just use pip install -e <root> to test")
